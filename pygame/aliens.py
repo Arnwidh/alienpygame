@@ -108,6 +108,34 @@ class Player(pg.sprite.Sprite):
         return pos, self.rect.top
 
 
+class Balloon(pg.sprite.Sprite):
+    """A simple balloon"""
+
+    speed = 30
+    animcycle = 10000 
+    images = []
+
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self, self.containers)
+        self.image = self.images[0]
+        self.image = pg.transform.scale(self.image, (50, 50))
+        self.rect = pg.Rect(10, 10, 10, 10)
+        self.facing = random.choice((-1, 1)) * Balloon.speed
+        self.frame = 0
+        if self.facing < 0:
+            self.rect.right = SCREENRECT.right
+             
+    def update(self):
+        self.rect.move_ip(self.facing, 0)
+        if not SCREENRECT.contains(self.rect):
+            self.facing = -self.facing
+            self.rect.top = self.rect.bottom + 1
+            self.rect = self.rect.clamp(SCREENRECT)
+        self.frame = self.frame + 1
+        self.image = self.images[self.frame // self.animcycle % 3]
+
+  
+
 class Alien(pg.sprite.Sprite):
     """An alien space ship. That slowly moves down the screen."""
 
@@ -250,6 +278,7 @@ def main(winstyle=0):
     img = load_image("explosion1.gif")
     Explosion.images = [img, pg.transform.flip(img, 1, 1)]
     Alien.images = [load_image(im) for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
+    Balloon.images = [load_image("balloon.png")]
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
 
@@ -270,6 +299,7 @@ def main(winstyle=0):
     # load the sound effects
     boom_sound = load_sound("boom.wav")
     shoot_sound = load_sound("car_door.wav")
+    punch_sound = load_sound("punch.wav")
     if pg.mixer:
         music = os.path.join(main_dir, "data", "house_lo.wav")
         pg.mixer.music.load(music)
@@ -277,14 +307,18 @@ def main(winstyle=0):
 
     # Initialize Game Groups
     aliens = pg.sprite.Group()
+    balloons = pg.sprite.Group()
     shots = pg.sprite.Group()
     bombs = pg.sprite.Group()
     all = pg.sprite.RenderUpdates()
     lastalien = pg.sprite.GroupSingle()
+    lastballoon = pg.sprite.GroupSingle()
+
 
     # assign default groups to each sprite class
     Player.containers = all
     Alien.containers = aliens, all, lastalien
+    Balloon.containers = balloons, all, lastballoon
     Shot.containers = shots, all
     Bomb.containers = bombs, all
     Explosion.containers = all
@@ -299,6 +333,7 @@ def main(winstyle=0):
     global SCORE
     player = Player()
     Alien()  # note, this 'lives' because it goes into a sprite group
+    
     if pg.font:
         all.add(Score())
 
@@ -353,6 +388,7 @@ def main(winstyle=0):
             alienreload = alienreload - 1
         elif not int(random.random() * ALIEN_ODDS):
             Alien()
+            Balloon()
             alienreload = ALIEN_RELOAD
 
         # Drop bombs
@@ -368,11 +404,28 @@ def main(winstyle=0):
             SCORE = SCORE + 1
             player.kill()
 
+        # Detect collisions between balloon and player.
+        for balloon in pg.sprite.spritecollide(player, balloons, 1):
+            if pg.mixer:
+                punch_sound.play()
+            Explosion(balloon)
+            Explosion(player)
+            SCORE = SCORE + 1
+            player.kill()
+
+
         # See if shots hit the aliens.
         for alien in pg.sprite.groupcollide(aliens, shots, 1, 1).keys():
             if pg.mixer:
                 boom_sound.play()
             Explosion(alien)
+            SCORE = SCORE + 1
+
+        #Shots hitting balloon
+        for balloon in pg.sprite.groupcollide(balloons, shots, 1, 1).keys():
+            if pg.mixer:
+                punch_sound.play()
+            Explosion(balloon)
             SCORE = SCORE + 1
 
         # See if alien boms hit the player.
