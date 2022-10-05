@@ -25,6 +25,7 @@ Controls
 
 import random
 import os
+from turtle import speed
 
 # import basic pygame modules
 import pygame as pg
@@ -43,7 +44,6 @@ SCREENRECT = pg.Rect(0, 0, 640, 480)
 SCORE = 0
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
-
 
 def load_image(file):
     """loads an image, prepares it for play"""
@@ -111,7 +111,7 @@ class Player(pg.sprite.Sprite):
 class Alien(pg.sprite.Sprite):
     """An alien space ship. That slowly moves down the screen."""
 
-    speed = 13
+    speed = 10
     animcycle = 12
     images = []
 
@@ -133,6 +133,16 @@ class Alien(pg.sprite.Sprite):
         self.frame = self.frame + 1
         self.image = self.images[self.frame // self.animcycle % 3]
 
+class OtherAlien(Alien):
+    images = []
+    speed = -10
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self, self.containers)
+        self.image = self.images[0]
+        self.image = pg.transform.scale(self.image, (80, 71))
+        self.rect = pg.Rect(10, 10, 80, 71)
+        self.facing = OtherAlien.speed
+        self.frame = 0
 
 class Explosion(pg.sprite.Sprite):
     """An explosion. Hopefully the Alien and not the player!"""
@@ -250,9 +260,10 @@ def main(winstyle=0):
     img = load_image("explosion1.gif")
     Explosion.images = [img, pg.transform.flip(img, 1, 1)]
     Alien.images = [load_image(im) for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
+    OtherAlien.images = [load_image(im) for im in ("alienny2.png", "alienny2.png", "alienny2.png")]
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
-
+    
     # decorate the game window
     icon = pg.transform.scale(Alien.images[0], (32, 32))
     pg.display.set_icon(icon)
@@ -285,6 +296,7 @@ def main(winstyle=0):
     # assign default groups to each sprite class
     Player.containers = all
     Alien.containers = aliens, all, lastalien
+    OtherAlien.containers = aliens, all
     Shot.containers = shots, all
     Bomb.containers = bombs, all
     Explosion.containers = all
@@ -299,6 +311,7 @@ def main(winstyle=0):
     global SCORE
     player = Player()
     Alien()  # note, this 'lives' because it goes into a sprite group
+    OtherAlien()
     if pg.font:
         all.add(Score())
 
@@ -352,7 +365,10 @@ def main(winstyle=0):
         if alienreload:
             alienreload = alienreload - 1
         elif not int(random.random() * ALIEN_ODDS):
-            Alien()
+            if(random.randint(0, 1) == 0):
+                Alien()
+            else:
+                OtherAlien()
             alienreload = ALIEN_RELOAD
 
         # Drop bombs
