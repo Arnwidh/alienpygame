@@ -137,7 +137,7 @@ class Alien(pg.sprite.Sprite):
 
 class Plane(pg.sprite.Sprite):
 
-    speed = 5
+    speed = 4
     animcycle = 12
     images = []
 
@@ -157,7 +157,7 @@ class Plane(pg.sprite.Sprite):
             self.rect.top = self.rect.bottom + 1
             self.rect = self.rect.clamp(SCREENRECT)
         self.frame = self.frame + 1
-        self.image = self.images[self.frame // self.animcycle % 3]
+        self.image = self.images[self.frame // self.animcycle % 2]
 
 
 
@@ -280,7 +280,7 @@ def main(winstyle=0):
     img = load_image("explosion1.gif")
     Explosion.images = [img, pg.transform.flip(img, 1, 1)]
     Alien.images = [load_image(im) for im in ("alien1.png", "alien2.png", "alien3.png")]
-    Plane.images = [load_image(i) for i in ("plane3.gif", "plane3.gif", "plane3.gif")]
+    Plane.images = [load_image(i) for i in ("plane3.gif", "plane3.gif")]
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
 
