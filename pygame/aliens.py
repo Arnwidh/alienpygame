@@ -118,7 +118,7 @@ class Balloon(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
         self.image = pg.transform.scale(self.image, (50, 50))
-        self.rect = pg.Rect(10, 10, 10, 10)
+        self.rect = pg.Rect(10, 10, 50, 50)
         self.facing = random.choice((-1, 1)) * Balloon.speed
         self.frame = 0
         if self.facing < 0:
