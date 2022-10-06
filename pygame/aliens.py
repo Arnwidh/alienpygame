@@ -110,7 +110,7 @@ class Player(pg.sprite.Sprite):
 class Balloon(pg.sprite.Sprite):
     """A simple balloon"""
 
-    speed = 30
+    speed = 10
     animcycle = 10000 
     images = []
 
