@@ -51,7 +51,7 @@ def load_image(file):
         surface = pg.image.load(file)
     except pg.error:
         raise SystemExit('Could not load image "%s" %s' % (file, pg.get_error()))
-    return surface.convert()
+    return surface.convert_alpha()
 
 
 def load_sound(file):
@@ -163,7 +163,7 @@ class Alien(pg.sprite.Sprite):
 
 class Plane(pg.sprite.Sprite):
 
-    speed = 5
+    speed = 7
     images = []
 
     def __init__(self):
