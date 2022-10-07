@@ -44,7 +44,6 @@ SCORE = 0
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
-
 def load_image(file):
     """loads an image, prepares it for play"""
     file = os.path.join(main_dir, "data", file)
@@ -52,7 +51,7 @@ def load_image(file):
         surface = pg.image.load(file)
     except pg.error:
         raise SystemExit('Could not load image "%s" %s' % (file, pg.get_error()))
-    return surface.convert()
+    return surface.convert_alpha()
 
 
 def load_sound(file):
@@ -111,15 +110,15 @@ class Player(pg.sprite.Sprite):
 class Balloon(pg.sprite.Sprite):
     """A simple balloon"""
 
-    speed = 30
-    animcycle = 10000 
+    speed = 10
+    animcycle = 100
     images = []
 
     def __init__(self):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
-        self.image = pg.transform.scale(self.image, (50, 50))
-        self.rect = pg.Rect(10, 10, 10, 10)
+        self.image = pg.transform.scale(self.image, (100, 100))
+        self.rect = pg.Rect(10, 10, 100, 100)
         self.facing = random.choice((-1, 1)) * Balloon.speed
         self.frame = 0
         if self.facing < 0:
@@ -132,14 +131,14 @@ class Balloon(pg.sprite.Sprite):
             self.rect.top = self.rect.bottom + 1
             self.rect = self.rect.clamp(SCREENRECT)
         self.frame = self.frame + 1
-        self.image = self.images[self.frame // self.animcycle % 3]
+        # self.image = self.images[self.frame // self.animcycle % 3]
 
   
 
 class Alien(pg.sprite.Sprite):
     """An alien space ship. That slowly moves down the screen."""
 
-    speed = 13
+    speed = 10
     animcycle = 12
     images = []
 
@@ -161,6 +160,41 @@ class Alien(pg.sprite.Sprite):
         self.frame = self.frame + 1
         self.image = self.images[self.frame // self.animcycle % 3]
 
+
+class Plane(pg.sprite.Sprite):
+
+    speed = 5
+    images = []
+
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self, self.containers)
+        self.image = self.images[0]
+        self.image = pg.transform.scale(self.image,(90,70))
+        self.rect = pg.Rect(10, 10, 90,70)
+        #self.rect = self.image.get_rect()
+        self.facing = random.choice((-1, 1)) * Plane.speed
+        self.frame = 0
+        if self.facing < 0:
+            self.rect.right = SCREENRECT.right
+
+    def update(self):
+        self.rect.move_ip(self.facing, 0)
+        if not SCREENRECT.contains(self.rect):
+            self.facing = -self.facing
+            self.rect.top = self.rect.bottom + 1
+            self.rect = self.rect.clamp(SCREENRECT)
+        self.frame = self.frame + 1
+
+class OtherAlien(Alien):
+    images = []
+    speed = -10
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self, self.containers)
+        self.image = self.images[0]
+        self.image = pg.transform.scale(self.image, (80, 71))
+        self.rect = pg.Rect(10, 10, 80, 71)
+        self.facing = OtherAlien.speed
+        self.frame = 0
 
 class Explosion(pg.sprite.Sprite):
     """An explosion. Hopefully the Alien and not the player!"""
@@ -278,10 +312,12 @@ def main(winstyle=0):
     img = load_image("explosion1.gif")
     Explosion.images = [img, pg.transform.flip(img, 1, 1)]
     Alien.images = [load_image(im) for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
-    Balloon.images = [load_image("balloon.png")]
+    Balloon.images = [load_image("plane.png")]
+    OtherAlien.images = [load_image(im) for im in ("alienny2.png", "alienny2.png", "alienny2.png")]
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
-
+    Plane.images = [load_image(i) for i in ("plane4.png", "plane4.png")]
+    
     # decorate the game window
     icon = pg.transform.scale(Alien.images[0], (32, 32))
     pg.display.set_icon(icon)
@@ -313,12 +349,17 @@ def main(winstyle=0):
     all = pg.sprite.RenderUpdates()
     lastalien = pg.sprite.GroupSingle()
     lastballoon = pg.sprite.GroupSingle()
+    planes = pg.sprite.Group()
+    last_palne = pg.sprite.GroupSingle()
+    
 
 
     # assign default groups to each sprite class
     Player.containers = all
     Alien.containers = aliens, all, lastalien
     Balloon.containers = balloons, all, lastballoon
+    OtherAlien.containers = aliens, all
+    Plane.containers = planes, all, last_palne
     Shot.containers = shots, all
     Bomb.containers = bombs, all
     Explosion.containers = all
@@ -333,7 +374,9 @@ def main(winstyle=0):
     global SCORE
     player = Player()
     Alien()  # note, this 'lives' because it goes into a sprite group
-    
+    OtherAlien()
+    Balloon()
+    Plane()
     if pg.font:
         all.add(Score())
 
@@ -387,15 +430,29 @@ def main(winstyle=0):
         if alienreload:
             alienreload = alienreload - 1
         elif not int(random.random() * ALIEN_ODDS):
-            Alien()
-            Balloon()
+            if(random.randint(0, 1) == 0):
+                Alien()
+                Plane()
+            else:
+                OtherAlien()
+                Balloon()
             alienreload = ALIEN_RELOAD
 
         # Drop bombs
+        if last_palne and not int(random.random()* BOMB_ODDS):
+            Bomb(last_palne.sprite)
         if lastalien and not int(random.random() * BOMB_ODDS):
             Bomb(lastalien.sprite)
 
         # Detect collisions between aliens and players.
+        for plane in pg.sprite.spritecollide(player,planes,1):
+            if pg.mixer:
+                boom_sound.play()
+            Explosion(plane)
+            Explosion(player)
+            SCORE = SCORE + 1
+            player.kill()
+        
         for alien in pg.sprite.spritecollide(player, aliens, 1):
             if pg.mixer:
                 boom_sound.play()
@@ -415,6 +472,11 @@ def main(winstyle=0):
 
 
         # See if shots hit the aliens.
+        for plane in pg.sprite.groupcollide(planes, shots, 1,1).keys():
+            if pg.mixer:
+                boom_sound.play()
+            Explosion(plane)
+            SCORE = SCORE + 1
         for alien in pg.sprite.groupcollide(aliens, shots, 1, 1).keys():
             if pg.mixer:
                 boom_sound.play()
