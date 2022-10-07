@@ -111,14 +111,14 @@ class Balloon(pg.sprite.Sprite):
     """A simple balloon"""
 
     speed = 10
-    animcycle = 10000 
+    animcycle = 100
     images = []
 
     def __init__(self):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
-        self.image = pg.transform.scale(self.image, (50, 50))
-        self.rect = pg.Rect(10, 10, 50, 50)
+        self.image = pg.transform.scale(self.image, (100, 100))
+        self.rect = pg.Rect(10, 10, 100, 100)
         self.facing = random.choice((-1, 1)) * Balloon.speed
         self.frame = 0
         if self.facing < 0:
@@ -131,7 +131,7 @@ class Balloon(pg.sprite.Sprite):
             self.rect.top = self.rect.bottom + 1
             self.rect = self.rect.clamp(SCREENRECT)
         self.frame = self.frame + 1
-        self.image = self.images[self.frame // self.animcycle % 3]
+        # self.image = self.images[self.frame // self.animcycle % 3]
 
   
 
@@ -312,7 +312,7 @@ def main(winstyle=0):
     img = load_image("explosion1.gif")
     Explosion.images = [img, pg.transform.flip(img, 1, 1)]
     Alien.images = [load_image(im) for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
-    Balloon.images = [load_image("balloon.png")]
+    Balloon.images = [load_image("plane.png")]
     OtherAlien.images = [load_image(im) for im in ("alienny2.png", "alienny2.png", "alienny2.png")]
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
