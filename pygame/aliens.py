@@ -109,8 +109,8 @@ class Player(pg.sprite.Sprite):
 
 class Balloon(pg.sprite.Sprite):
     """A simple balloon"""
-
-    speed = 10
+                                                                                                                                                                                                                      
+    speed = 4
     animcycle = 100
     images = []
 
@@ -138,7 +138,7 @@ class Balloon(pg.sprite.Sprite):
 class Alien(pg.sprite.Sprite):
     """An alien space ship. That slowly moves down the screen."""
 
-    speed = 10
+    speed = 4
     animcycle = 12
     images = []
 
@@ -163,7 +163,7 @@ class Alien(pg.sprite.Sprite):
 
 class Plane(pg.sprite.Sprite):
 
-    speed = 7
+    speed = 4
     images = []
 
     def __init__(self):
@@ -187,7 +187,7 @@ class Plane(pg.sprite.Sprite):
 
 class OtherAlien(Alien):
     images = []
-    speed = -10
+    speed = 4
     def __init__(self):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
@@ -290,6 +290,53 @@ class Score(pg.sprite.Sprite):
             self.image = self.font.render(msg, 0, self.color)
 
 
+class StartKnapp(pg.sprite.Sprite):
+    images = []
+
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self, self.containers)
+        self.image = self.images[0]
+        self.x = 240
+        self.y = 140
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+    def nedtryckt(self):
+        self.image = self.images[1]
+
+    def upptryckt(self):
+        self.image = self.images[0]   
+
+
+class Quit(pg.sprite.Sprite):
+    images = []
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self, self.containers)
+        self.image = self.images[0]
+        self.x = 240
+        self.y = 210
+        self.rect = self.image.get_rect(center = (self.x, self.y))
+
+
+class BackgroundKlass(pg.sprite.Sprite):
+
+    images = []
+
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self, self.containers)
+        self.image = self.images[0]
+        self.image = pg.transform.scale(self.image, (SCREENRECT.width, SCREENRECT.height*2))
+        self.rect = pg.Rect(0, 0, SCREENRECT.width, SCREENRECT.height*2)
+
+    def update(self):
+        self.rect.move_ip(0, 2)
+        if(self.rect.y > 0):
+            self.rect.y = -self.rect.height//2
+    
+    
+
+
+
+
 def main(winstyle=0):
     # Initialize pygame
     if pg.get_sdl_version()[0] == 2:
@@ -317,15 +364,18 @@ def main(winstyle=0):
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
     Plane.images = [load_image(i) for i in ("plane4.png", "plane4.png")]
+    StartKnapp.images = [load_image("Menu_Green_01.png"), load_image("Menu_Red_03.png")]
+    Quit.images = [load_image("Menu_Green_04.png")]
+    BackgroundKlass.images = [load_image("background4.png")]
     
     # decorate the game window
     icon = pg.transform.scale(Alien.images[0], (32, 32))
     pg.display.set_icon(icon)
     pg.display.set_caption("Pygame Aliens")
-    pg.mouse.set_visible(0)
+    pg.mouse.set_visible(True)
 
     # create the background, tile the bgd image
-    bgdtile = load_image("background.gif")
+    bgdtile = pg.transform.scale(load_image("background3.gif"), (640,480))
     background = pg.Surface(SCREENRECT.size)
     for x in range(0, SCREENRECT.width, bgdtile.get_width()):
         background.blit(bgdtile, (x, 0))
@@ -351,6 +401,7 @@ def main(winstyle=0):
     lastballoon = pg.sprite.GroupSingle()
     planes = pg.sprite.Group()
     last_palne = pg.sprite.GroupSingle()
+    menu = pg.sprite.Group()
     
 
 
@@ -364,6 +415,9 @@ def main(winstyle=0):
     Bomb.containers = bombs, all
     Explosion.containers = all
     Score.containers = all
+    StartKnapp.containers = menu
+    Quit.containers = menu
+    BackgroundKlass.containers = all
 
     # Create Some Starting Values
     global score
@@ -372,13 +426,48 @@ def main(winstyle=0):
 
     # initialize our starting sprites
     global SCORE
+    start_knapp = StartKnapp()
+    BackgroundKlass()
     player = Player()
+    
+    
     Alien()  # note, this 'lives' because it goes into a sprite group
     OtherAlien()
     Balloon()
-    Plane()
+    Quit()
+    
+    
     if pg.font:
         all.add(Score())
+    
+    
+    start_game = False
+    while not start_game:
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN:
+                start_game = True
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if(Quit().rect.collidepoint(pg.mouse.get_pos())):
+                    pg.quit()
+                    
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
+                    start_knapp.nedtryckt()
+                    
+            elif event.type == pg.MOUSEBUTTONUP:
+                    if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
+                        start_knapp.upptryckt()
+                        Plane()
+                        start_game = True
+                    
+                    
+                
+
+
+        pg.display.flip()
+        dirty = menu.draw(screen)
+        pg.display.update(dirty)
+    pg.mouse.set_visible(False)    
 
     # Run our main loop whilst the player is alive.
     while player.alive():
