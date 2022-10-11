@@ -328,7 +328,7 @@ class BackgroundKlass(pg.sprite.Sprite):
         self.rect = pg.Rect(0, 0, SCREENRECT.width, SCREENRECT.height*2)
 
     def update(self):
-        self.rect.move_ip(0, 2)
+        self.rect.move_ip(0, 3)
         if(self.rect.y > 0):
             self.rect.y = -self.rect.height//2
     
@@ -435,7 +435,7 @@ def main(winstyle=0):
     OtherAlien()
     Balloon()
     Quit()
-    
+    Plane()
     
     if pg.font:
         all.add(Score())
@@ -457,7 +457,6 @@ def main(winstyle=0):
             elif event.type == pg.MOUSEBUTTONUP:
                     if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
                         start_knapp.upptryckt()
-                        Plane()
                         start_game = True
                     
                     
