@@ -278,31 +278,7 @@ class Score(pg.sprite.Sprite):
             msg = "Score: %d" % SCORE
             self.image = self.font.render(msg, 0, self.color)
 
-# class StartKnapp(pg.sprite.Sprite):
-#     images = []
 
-#     def __init__(self):
-#         pg.sprite.Sprite.__init__(self, self.containers)
-#         self.image = self.images[0]
-#         self.x = 240
-#         self.y = 140
-#         self.rect = self.image.get_rect(center=(self.x, self.y))
-
-#     def nedtryckt(self):
-#         self.image = self.images[1]
-
-#     def upptryckt(self):
-#         self.image = self.images[0]   
-
-
-# class Quit(pg.sprite.Sprite):
-#     images = []
-#     def __init__(self):
-#         pg.sprite.Sprite.__init__(self, self.containers)
-#         self.image = self.images[0]
-#         self.x = 240
-#         self.y = 210
-#         self.rect = self.image.get_rect(center = (self.x, self.y))
 
 
 class BackgroundKlass(pg.sprite.Sprite):
@@ -381,8 +357,6 @@ def main(winstyle=0):
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
     Plane.images = [load_image(i) for i in ("plane4.png", "plane4.png")]
-    # StartKnapp.images = [load_image("Menu_Green_01.png"), load_image("Menu_Red_03.png")]
-    # Quit.images = [load_image("Menu_Green_04.png")]
     BackgroundKlass.images = [load_image("background4.png")]
 
 
@@ -403,9 +377,9 @@ def main(winstyle=0):
     options_button = Button(240, 200, options_img, 1)
     quit_button = Button(240, 300, quit_img, 1)
     back_button = Button(240, 370, back_img, 1)
-    plane_button = Button(50, 50, plane_img, 1)
-    baloon_button = Button(50, 200, baloon_img, 1)
-    otheralien_button = Button(50, 350,otheralien_img,1)
+    plane_button = Button(240, 100, plane_img, 1)
+    baloon_button = Button(240, 200, baloon_img, 1)
+    otheralien_button = Button(240, 310,otheralien_img,1)
 
 
     
@@ -468,17 +442,13 @@ def main(winstyle=0):
 
     # initialize our starting sprites
     global SCORE
-    # start_knapp = StartKnapp()
+   
     BackgroundKlass()
     player = Player()
     
     
     # Alien()  # note, this 'lives' because it goes into a sprite group
-    # OtherAlien()
-    # Balloon()
-    # Quit()
-    # Plane()
-    
+      
     if pg.font:
         all.add(Score())
     plane1 = False
@@ -488,14 +458,15 @@ def main(winstyle=0):
     start_game = False
     while not start_game:
         screen.blit(background, (0, 0))
+        
         if menu_state == False:  # When it is in the main menu
             if resume_button.draw(screen):
                 start_game= True
                 pg.display.flip()
                 dirty = menu.draw(screen)
-                pg.display.update(dirty)
+                pg.display.update(dirty)                  
                 pg.mouse.set_visible(False)
-                # game_paused = False
+                
             if options_button.draw(screen):
                 menu_state = True
             if quit_button.draw(screen):
@@ -517,7 +488,7 @@ def main(winstyle=0):
                 start_game= True
                 
             if otheralien_button.draw(screen):
-                Alien()
+                OtherAlien()
                 alien1 = True
                 start_game= True
 
@@ -529,30 +500,7 @@ def main(winstyle=0):
                 pass
             if event.type == pg.QUIT:
                 return
-
-
-
-
-        # for event in pg.event.get():
-        #     if event.type == pg.KEYDOWN:
-        #         start_game = True
-        #     elif event.type == pg.MOUSEBUTTONDOWN:
-        #         if(Quit().rect.collidepoint(pg.mouse.get_pos())):
-        #             pg.quit()
-                    
-        #     elif event.type == pg.MOUSEBUTTONDOWN:
-        #         if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
-        #             start_knapp.nedtryckt()
-                    
-        #     elif event.type == pg.MOUSEBUTTONUP:
-        #             if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
-        #                 start_knapp.upptryckt()
-        #                 start_game = True
-                    
-                    
-                
-
-
+        
         pg.display.flip()
         dirty = menu.draw(screen)
         pg.display.update(dirty)
@@ -611,11 +559,8 @@ def main(winstyle=0):
             if plane1 == True:
 
                 if(random.randint(0, 1) == 0):
-                    # Alien()
                     Plane()
-                # else:
-                #     OtherAlien()
-                #     Balloon()
+                
                 alienreload = ALIEN_RELOAD
             elif baloon1 == True :
 
@@ -626,7 +571,7 @@ def main(winstyle=0):
             elif alien1 == True:
 
                 if(random.randint(0, 1) == 0):
-                    Alien()
+                    OtherAlien()
                 
                 alienreload = ALIEN_RELOAD
 
