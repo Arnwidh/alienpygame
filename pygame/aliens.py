@@ -484,13 +484,11 @@ def main(winstyle=0):
     #start_knapp = StartKnapp()
     BackgroundKlass()
     player = Player()
-    
-    
     Alien()  # note, this 'lives' because it goes into a sprite group
-    OtherAlien()
-    Balloon()
+    #OtherAlien()
+    #Balloon()
     #Quit()
-    Plane()
+    #Plane()
     
     if pg.font:
         all.add(Score())
@@ -500,6 +498,7 @@ def main(winstyle=0):
     while not start_game:
         screen.blit(background, (0, 0))
         enemy = 0
+        MAX_SHOTS = 2
         if menu_state == False:  # When it is in the main menu
             if resume_button.draw(screen):
                 start_game= True
@@ -525,9 +524,9 @@ def main(winstyle=0):
             if back_button.draw(screen):
                 menu_state = False
             #if cheat_button.draw(screen):
-                #MAX_SHOTS = 100
-                #Player.speed = 30
-                #menu_state = False
+            #    MAX_SHOTS = 100
+            #    Player.speed = 30
+            #    menu_state = False
                 
 
         for event in pg.event.get():
