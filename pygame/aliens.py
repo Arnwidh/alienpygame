@@ -408,7 +408,7 @@ def main(winstyle=0):
     baloon_img = load_image("plane.png").convert_alpha()
     baloon_img = pg.transform.scale(baloon_img, (100,100))
     otheralien_img = load_image("alienny2.png").convert_alpha()
-
+    cheat_button_img = load_image("asprite.bmp").convert_alpha()
 
     #create button instances
     resume_button = Button(240, 100, resume_img, 1)
@@ -418,6 +418,7 @@ def main(winstyle=0):
     plane_button = Button(50, 50, plane_img, 1)
     baloon_button = Button(50, 200, baloon_img, 1)
     otheralien_button = Button(50, 350,otheralien_img,1)
+    cheat_button = Button(615, 450, cheat_button_img, 1)
 
 
 
@@ -498,6 +499,7 @@ def main(winstyle=0):
     start_game = False
     while not start_game:
         screen.blit(background, (0, 0))
+        enemy = 0
         if menu_state == False:  # When it is in the main menu
             if resume_button.draw(screen):
                 start_game= True
@@ -511,14 +513,21 @@ def main(winstyle=0):
             if plane_button.draw(screen):
                 enemy = 1
                 menu_state = False
+                start_game = True
             if baloon_button.draw(screen):
                 enemy = 2
                 menu_state = False
+                start_game = True
             if otheralien_button.draw(screen):
                 enemy = 3
                 menu_state = False
+                start_game = True
             if back_button.draw(screen):
                 menu_state = False
+            #if cheat_button.draw(screen):
+                #MAX_SHOTS = 100
+                #Player.speed = 30
+                #menu_state = False
                 
 
         for event in pg.event.get():
@@ -620,19 +629,13 @@ def main(winstyle=0):
                 alienreload = ALIEN_RELOAD
             elif(random.randint(0,1) == 1 and enemy == 3):
                 Alien()
+            if(random.randint(0, 1) == 0 and enemy == 0):
+                Plane()
+                Alien()
+            elif(random.randint(0,1) == 1 and enemy == 0):
+                Balloon()
+                OtherAlien()
             
-        #else:
-        #    Alien()
-        #    alienreload = ALIEN_RELOAD
-            
-        #elif not int(random.random() * ALIEN_ODDS):
-        #    if(random.randint(0, 1) == 0):
-        #        Alien()
-        #        Plane()
-        #    else:
-        #        OtherAlien()
-        #        Balloon()
-            #alienreload = ALIEN_RELOAD
 
         # Drop bombs
         if last_palne and not int(random.random()* BOMB_ODDS):
