@@ -290,31 +290,31 @@ class Score(pg.sprite.Sprite):
             self.image = self.font.render(msg, 0, self.color)
 
 
-class StartKnapp(pg.sprite.Sprite):
-    images = []
+#class StartKnapp(pg.sprite.Sprite):
+#    images = []
 
-    def __init__(self):
-        pg.sprite.Sprite.__init__(self, self.containers)
-        self.image = self.images[0]
-        self.x = 240
-        self.y = 140
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+#    def __init__(self):
+#        pg.sprite.Sprite.__init__(self, self.containers)
+#        self.image = self.images[0]
+#        self.x = 240
+#        self.y = 140
+#        self.rect = self.image.get_rect(center=(self.x, self.y))
 
-    def nedtryckt(self):
-        self.image = self.images[1]
+#    def nedtryckt(self):
+#        self.image = self.images[1]
 
-    def upptryckt(self):
-        self.image = self.images[0]   
+#    def upptryckt(self):
+#        self.image = self.images[0]   
 
 
-class Quit(pg.sprite.Sprite):
-    images = []
-    def __init__(self):
-        pg.sprite.Sprite.__init__(self, self.containers)
-        self.image = self.images[0]
-        self.x = 240
-        self.y = 210
-        self.rect = self.image.get_rect(center = (self.x, self.y))
+#class Quit(pg.sprite.Sprite):
+#    images = []
+#    def __init__(self):
+#        pg.sprite.Sprite.__init__(self, self.containers)
+#        self.image = self.images[0]
+#        self.x = 240
+#        self.y = 210
+#        self.rect = self.image.get_rect(center = (self.x, self.y))
 
 
 class BackgroundKlass(pg.sprite.Sprite):
@@ -333,12 +333,41 @@ class BackgroundKlass(pg.sprite.Sprite):
             self.rect.y = -self.rect.height//2
     
     
+class Button():
+	def __init__(self, x, y, image, scale):
+		width = image.get_width()
+		height = image.get_height()
+		self.image = pg.transform.scale(image, (int(width * scale), int(height * scale)))
+		self.rect = self.image.get_rect()
+		self.rect.topleft = (x, y)
+		self.clicked = False
+
+	def draw(self, surface):
+		action = False
+		#get mouse position
+		pos = pg.mouse.get_pos()
+
+		#check mouseover and clicked conditions
+		if self.rect.collidepoint(pos):
+			if pg.mouse.get_pressed()[0] == 1 and self.clicked == False:
+				self.clicked = True
+				action = True
+
+		if pg.mouse.get_pressed()[0] == 0:
+			self.clicked = False
+
+		#draw button on screen
+		surface.blit(self.image, (self.rect.x, self.rect.y))
+
+		return action   
+
 
 
 
 
 def main(winstyle=0):
     # Initialize pygame
+    menu_state = "main"
     if pg.get_sdl_version()[0] == 2:
         pg.mixer.pre_init(44100, 32, 2, 1024)
     pg.init()
@@ -364,10 +393,35 @@ def main(winstyle=0):
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
     Plane.images = [load_image(i) for i in ("plane4.png", "plane4.png")]
-    StartKnapp.images = [load_image("Menu_Green_01.png"), load_image("Menu_Red_03.png")]
-    Quit.images = [load_image("Menu_Green_04.png")]
+    #StartKnapp.images = [load_image("Menu_Green_01.png"), load_image("Menu_Red_03.png")]
+    #Quit.images = [load_image("Menu_Green_04.png")]
     BackgroundKlass.images = [load_image("background4.png")]
     
+
+    #load button images
+    resume_img = load_image("button_resume.png").convert_alpha()
+    options_img = load_image("button_options.png").convert_alpha()
+    quit_img = load_image("button_quit.png").convert_alpha()
+    back_img = load_image("button_back.png").convert_alpha()
+    plane_img = load_image("plane4.png").convert_alpha()
+    plane_img = pg.transform.scale(plane_img, (100,100))
+    baloon_img = load_image("plane.png").convert_alpha()
+    baloon_img = pg.transform.scale(baloon_img, (100,100))
+    otheralien_img = load_image("alienny2.png").convert_alpha()
+
+
+    #create button instances
+    resume_button = Button(240, 100, resume_img, 1)
+    options_button = Button(240, 200, options_img, 1)
+    quit_button = Button(240, 300, quit_img, 1)
+    back_button = Button(240, 370, back_img, 1)
+    plane_button = Button(50, 50, plane_img, 1)
+    baloon_button = Button(50, 200, baloon_img, 1)
+    otheralien_button = Button(50, 350,otheralien_img,1)
+
+
+
+
     # decorate the game window
     icon = pg.transform.scale(Alien.images[0], (32, 32))
     pg.display.set_icon(icon)
@@ -415,8 +469,8 @@ def main(winstyle=0):
     Bomb.containers = bombs, all
     Explosion.containers = all
     Score.containers = all
-    StartKnapp.containers = menu
-    Quit.containers = menu
+    #StartKnapp.containers = menu
+    #Quit.containers = menu
     BackgroundKlass.containers = all
 
     # Create Some Starting Values
@@ -426,7 +480,7 @@ def main(winstyle=0):
 
     # initialize our starting sprites
     global SCORE
-    start_knapp = StartKnapp()
+    #start_knapp = StartKnapp()
     BackgroundKlass()
     player = Player()
     
@@ -434,30 +488,57 @@ def main(winstyle=0):
     Alien()  # note, this 'lives' because it goes into a sprite group
     OtherAlien()
     Balloon()
-    Quit()
+    #Quit()
     Plane()
     
     if pg.font:
         all.add(Score())
     
-    
+    menu_state = False
     start_game = False
     while not start_game:
+        screen.blit(background, (0, 0))
+        if menu_state == False:  # When it is in the main menu
+            if resume_button.draw(screen):
+                start_game= True
+                # game_paused = False
+            if options_button.draw(screen):
+                menu_state = True
+            if quit_button.draw(screen):
+                pg.quit()
+        elif menu_state == True: # when it will be in the option menu
+                       
+            plane_button.draw(screen)
+            baloon_button.draw(screen)
+            otheralien_button.draw(screen)
+            if back_button.draw(screen):
+                menu_state = False
+                
+
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
-                start_game = True
-            elif event.type == pg.MOUSEBUTTONDOWN:
-                if(Quit().rect.collidepoint(pg.mouse.get_pos())):
-                    pg.quit()
+                pass
+            if event.type == pg.QUIT:
+                return    
+        
+
+
+
+        #for event in pg.event.get():
+        #    if event.type == pg.KEYDOWN:
+        #        start_game = True
+        #    elif event.type == pg.MOUSEBUTTONDOWN:
+        #        if(Quit().rect.collidepoint(pg.mouse.get_pos())):
+        #            pg.quit()
                     
-            elif event.type == pg.MOUSEBUTTONDOWN:
-                if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
-                    start_knapp.nedtryckt()
+        #    elif event.type == pg.MOUSEBUTTONDOWN:
+        #        if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
+        #            start_knapp.nedtryckt()
                     
-            elif event.type == pg.MOUSEBUTTONUP:
-                    if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
-                        start_knapp.upptryckt()
-                        start_game = True
+        #    elif event.type == pg.MOUSEBUTTONUP:
+        #            if(start_knapp.rect.collidepoint(pg.mouse.get_pos())):
+        #                start_knapp.upptryckt()
+        #                start_game = True
                     
                     
                 
