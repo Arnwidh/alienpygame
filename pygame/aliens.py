@@ -508,9 +508,15 @@ def main(winstyle=0):
                 pg.quit()
         elif menu_state == True: # when it will be in the option menu
                        
-            plane_button.draw(screen)
-            baloon_button.draw(screen)
-            otheralien_button.draw(screen)
+            if plane_button.draw(screen):
+                enemy = 1
+                menu_state = False
+            if baloon_button.draw(screen):
+                enemy = 2
+                menu_state = False
+            if otheralien_button.draw(screen):
+                enemy = 3
+                menu_state = False
             if back_button.draw(screen):
                 menu_state = False
                 
@@ -599,13 +605,34 @@ def main(winstyle=0):
         if alienreload:
             alienreload = alienreload - 1
         elif not int(random.random() * ALIEN_ODDS):
-            if(random.randint(0, 1) == 0):
-                Alien()
+            if(random.randint(0, 1) == 0) and enemy == 1:
                 Plane()
-            else:
-                OtherAlien()
+                alienreload = ALIEN_RELOAD
+            elif(random.randint(0,1) == 1 and enemy == 1):
+                Alien()
+            if(random.randint(0, 1) == 0) and enemy == 2:
                 Balloon()
-            alienreload = ALIEN_RELOAD
+                alienreload = ALIEN_RELOAD
+            elif(random.randint(0,1) == 1 and enemy == 2):
+                Alien()
+            if(random.randint(0, 1) == 0) and enemy == 3:
+                OtherAlien()
+                alienreload = ALIEN_RELOAD
+            elif(random.randint(0,1) == 1 and enemy == 3):
+                Alien()
+            
+        #else:
+        #    Alien()
+        #    alienreload = ALIEN_RELOAD
+            
+        #elif not int(random.random() * ALIEN_ODDS):
+        #    if(random.randint(0, 1) == 0):
+        #        Alien()
+        #        Plane()
+        #    else:
+        #        OtherAlien()
+        #        Balloon()
+            #alienreload = ALIEN_RELOAD
 
         # Drop bombs
         if last_palne and not int(random.random()* BOMB_ODDS):
